@@ -24,8 +24,8 @@ x_test = pd.DataFrame({
                         'p':[], 'q':[], 'r':[],
                         'volt':[],'sb':[], 'hb':[],
                         'hs':[], 's':[],
-                        'roll':[], 'pitch':[], 'yaw':[], 'z_dot':[],
-                        'z':[]
+                        # 'z_dot':[],
+                        # 'z':[]
                         })
 
 z0 = 0
@@ -41,21 +41,25 @@ enable_depth = rospy.get_param('/tensorflow_dvl/enable_depth')
 dvl_msg = TwistWithCovarianceStamped()
 
 
-def callback_imu(msg):
+def callback_imu_accel(msg):
     global x_test
-    x_test.at[0, 'udot'] = msg.linear_acceleration.x
-    x_test.at[0, 'vdot'] = msg.linear_acceleration.y
-    x_test.at[0, 'wdot'] = msg.linear_acceleration.z
-    x_test.at[0, 'p'] = msg.angular_velocity.x
-    x_test.at[0, 'q'] = msg.angular_velocity.y
-    x_test.at[0, 'r'] = msg.angular_velocity.z
+    x_test.at[0, 'udot'] = msg.vector.x
+    x_test.at[0, 'vdot'] = msg.vector.y
+    x_test.at[0, 'wdot'] = msg.vector.z+9.8
     dvl_msg.header.stamp = msg.header.stamp
 
+def callback_imu_pqr(msg):
+    global x_test
+    x_test.at[0, 'p'] = msg.vector.x
+    x_test.at[0, 'q'] = msg.vector.y
+    x_test.at[0, 'r'] = msg.vector.z
+    dvl_msg.header.stamp = msg.header.stamp
+    
 def callback_euler(msg):
     global x_test
-    x_test.at[0, 'roll'] = msg.vector.x
-    x_test.at[0, 'pitch'] = msg.vector.y
-    x_test.at[0, 'yaw'] = msg.vector.z
+    # x_test.at[0, 'roll'] = msg.vector.x
+    # x_test.at[0, 'pitch'] = msg.vector.y
+    # x_test.at[0, 'yaw'] = msg.vector.z
 
 
 def callback_depth(msg):
@@ -67,8 +71,8 @@ def callback_depth(msg):
     dt = zt_now-zt_0
     zt_0 = zt_now
     z0 = msg.data
-    x_test.at[0, 'z'] = msg.data
-    x_test.at[0, 'z_dot'] = dz/dt
+    # x_test.at[0, 'z'] = msg.data
+    # x_test.at[0, 'z_dot'] = dz/dt
 
 def callback_s_thrust(msg):
     global x_test
@@ -88,15 +92,16 @@ def callback_hs_thrust(msg):
 
 def callback_volt(msg):
     global x_test
-    x_test.at[0, 'volt'] = msg.data
+    x_test.at[0, 'volt'] = msg.data/10.00
 
 # def callback_amp(msg):
 #     global x_test
-#     x_test.at[0, 'amp'] = msg.data/10000.00
-#     # print(x_test.at[0, 'amp'])
+#     x_test.at[0, 'amp'] = msg.data
+    # print(x_test.at[0, 'amp'])
     
 def compute_vel():
     global x_test
+    global z0
     global model
     global dvl_msg
     if not x_test.empty:
@@ -110,7 +115,8 @@ def compute_vel():
         # print(x_test.iloc[[0],15:16])
         # print(x_test.rank())
         # print(list(x_test))
-        if x_test.at[0, 'z']>enable_depth:
+        # if x_test.at[0, 'z']>enable_depth:
+        if z0 > enable_depth:
             # x_test.astype("float32")
             # print(rospy.get_rostime())
             # u_pre = u_model.predict(x_test, verbose='none',use_multiprocessing=True)
@@ -133,19 +139,22 @@ def compute_vel():
 
 def callback_dvl(msg):
     global x_test
+    global z0
     if not x_test.empty:
     ## only update the velocity from dvl if the vehicle is above the surface
-     if x_test.at[0, 'z']<enable_depth:
-        dvl_msg.twist.twist.linear.x = msg.twist.twist.linear.x
-        dvl_msg.twist.twist.linear.y = msg.twist.twist.linear.y
-        dvl_msg.twist.twist.linear.z = msg.twist.twist.linear.z
-        # dvl_msg.header.frame_id = "alpha/dvl"
+    #  if x_test.at[0, 'z']<enable_depth:
+        if z0 < enable_depth:
+            dvl_msg.twist.twist.linear.x = msg.twist.twist.linear.x
+            dvl_msg.twist.twist.linear.y = msg.twist.twist.linear.y
+            dvl_msg.twist.twist.linear.z = msg.twist.twist.linear.z
+            # dvl_msg.header.frame_id = "alpha/dvl"
 
 
 if __name__ == '__main__':
     rospy.init_node('tf_dvl_node') 
     pub = rospy.Publisher("/tensorflow_dvl/twist", TwistWithCovarianceStamped, queue_size=10)
-    imu_sub = rospy.Subscriber("/imu/data", Imu, callback_imu)
+    accel_sub = rospy.Subscriber("/imu/acceleration", Vector3Stamped, callback_imu_accel)
+    pqr_sub = rospy.Subscriber("/imu/angular_velocity", Vector3Stamped, callback_imu_pqr)
     euler_sub = rospy.Subscriber("/imu/euler/radians",Vector3Stamped,callback_euler)
     pressure_sub = rospy.Subscriber("/depth", Float64Stamped, callback_depth)
     s_thrust_sub = rospy.Subscriber("/control/thruster/surge", Float64, callback_s_thrust)
