@@ -32,7 +32,7 @@ y_test = pd.read_csv(test_file_name, usecols=output_use_cols)
 x_test = x_test.astype("float32")
 y_test = y_test.astype("float32")
 
-x_test = x_test.iloc[[0], :]
+# x_test = x_test.iloc[[0], :]
 x_test = x_test.astype("float32")
 print(x_test)
 # eval = model.evaluate(x_test, y_test, batch_size=32, verbose=2)
