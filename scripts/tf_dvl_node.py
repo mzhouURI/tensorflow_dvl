@@ -10,7 +10,6 @@ from mvp_msgs.msg import Float64Stamped
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
-# from tensorflow.keras.datasets import mnist
 import pandas as pd
 import numpy as np
 # import matplotlib.pyplot as plt
@@ -22,15 +21,15 @@ np.set_printoptions(precision=3, suppress=True)
 x_test = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        'volt':[],'sb':[], 'hb':[],
+                        'roll':[], 'pitch':[],
+                        'volt':[],'amp':[], 'sb':[], 'hb':[],
                         'hs':[], 's':[],
-                        # 'z_dot':[],
-                        # 'z':[]
+                        'z_dot':[],
+                        'z':[]
                         })
 
 z0 = 0
 zt_0 = time.time()*1000.0
-# rospy.set_param('/tensor_flow/model_dir', '/model1/')
 
 u_model = keras.models.load_model( rospy.get_param('/tensorflow_dvl/u_model_dir') )
 v_model = keras.models.load_model( rospy.get_param('/tensorflow_dvl/v_model_dir') )
@@ -43,9 +42,9 @@ dvl_msg = TwistWithCovarianceStamped()
 
 def callback_imu_accel(msg):
     global x_test
-    x_test.at[0, 'udot'] = msg.vector.x
-    x_test.at[0, 'vdot'] = msg.vector.y
-    x_test.at[0, 'wdot'] = msg.vector.z+9.8
+    x_test.at[0, 'udot'] = msg.vector.x/10.0
+    x_test.at[0, 'vdot'] = msg.vector.y/10.0
+    x_test.at[0, 'wdot'] = (msg.vector.z+9.8)/10.0
     dvl_msg.header.stamp = msg.header.stamp
 
 def callback_imu_pqr(msg):
@@ -57,8 +56,8 @@ def callback_imu_pqr(msg):
     
 def callback_euler(msg):
     global x_test
-    # x_test.at[0, 'roll'] = msg.vector.x
-    # x_test.at[0, 'pitch'] = msg.vector.y
+    x_test.at[0, 'roll'] = msg.vector.x/4.0
+    x_test.at[0, 'pitch'] = msg.vector.y/4.0
     # x_test.at[0, 'yaw'] = msg.vector.z
 
 
@@ -71,8 +70,8 @@ def callback_depth(msg):
     dt = zt_now-zt_0
     zt_0 = zt_now
     z0 = msg.data
-    # x_test.at[0, 'z'] = msg.data
-    # x_test.at[0, 'z_dot'] = dz/dt
+    x_test.at[0, 'z'] = msg.data/5.0
+    x_test.at[0, 'z_dot'] = dz/dt
 
 def callback_s_thrust(msg):
     global x_test
@@ -92,11 +91,11 @@ def callback_hs_thrust(msg):
 
 def callback_volt(msg):
     global x_test
-    x_test.at[0, 'volt'] = msg.data/10.00
+    x_test.at[0, 'volt'] = msg.data/20.00
 
-# def callback_amp(msg):
-#     global x_test
-#     x_test.at[0, 'amp'] = msg.data
+def callback_amp(msg):
+    global x_test
+    x_test.at[0, 'amp'] = msg.data/20000.0
     # print(x_test.at[0, 'amp'])
     
 def compute_vel():
@@ -115,10 +114,7 @@ def compute_vel():
         # print(x_test.iloc[[0],15:16])
         # print(x_test.rank())
         # print(list(x_test))
-        # if x_test.at[0, 'z']>enable_depth:
-        if z0 > enable_depth:
-            # x_test.astype("float32")
-            # print(rospy.get_rostime())
+        if x_test.at[0, 'z']>enable_depth:
             # u_pre = u_model.predict(x_test, verbose='none',use_multiprocessing=True)
             # v_pre = v_model.predict(x_test, verbose='none',use_multiprocessing=True)
             # w_pre = v_model.predict(x_test, verbose='none',use_multiprocessing=True)
@@ -128,26 +124,23 @@ def compute_vel():
             # u_pre = u_model(x_test, training=False)
             # v_pre = v_model(x_test, training=False)
             # w_pre = w_model(x_test, training=False)
-            # msg = TwistWithCovarianceStamped()
             dvl_msg.twist.twist.linear.x = u_pre[0, 0]
             dvl_msg.twist.twist.linear.y = v_pre[0, 0]
             dvl_msg.twist.twist.linear.z = w_pre[0, 0]
 
         dvl_msg.header.frame_id = "alpha/dvl"
         pub.publish(dvl_msg)
-        # x_test.iloc[0:0]
 
 def callback_dvl(msg):
     global x_test
     global z0
     if not x_test.empty:
     ## only update the velocity from dvl if the vehicle is above the surface
-    #  if x_test.at[0, 'z']<enable_depth:
-        if z0 < enable_depth:
-            dvl_msg.twist.twist.linear.x = msg.twist.twist.linear.x
-            dvl_msg.twist.twist.linear.y = msg.twist.twist.linear.y
-            dvl_msg.twist.twist.linear.z = msg.twist.twist.linear.z
-            # dvl_msg.header.frame_id = "alpha/dvl"
+     if x_test.at[0, 'z']<enable_depth:
+        # if z0 < enable_depth:
+        dvl_msg.twist.twist.linear.x = msg.twist.twist.linear.x
+        dvl_msg.twist.twist.linear.y = msg.twist.twist.linear.y
+        dvl_msg.twist.twist.linear.z = msg.twist.twist.linear.z
 
 
 if __name__ == '__main__':
@@ -162,7 +155,7 @@ if __name__ == '__main__':
     hb_thrust_sub = rospy.Subscriber("/control/thruster/heave_bow", Float64, callback_hb_thrust)
     hs_thrust_sub = rospy.Subscriber("/control/thruster/heave_stern", Float64, callback_hs_thrust)
     volt_sub = rospy.Subscriber("/power/voltage", Float64Stamped, callback_volt)
-    # amp_sub = rospy.Subscriber("/power/current", Float64Stamped, callback_amp)
+    amp_sub = rospy.Subscriber("/power/current", Float64Stamped, callback_amp)
     dvl_sub = rospy.Subscriber("/dvl/twist", TwistWithCovarianceStamped, callback_dvl)
 
     rate = rospy.Rate(pub_hz)
