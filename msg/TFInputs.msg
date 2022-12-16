@@ -1,0 +1,16 @@
+header header
+float64 udot
+float64 vdot
+float64 wdot
+float64 p
+float64 q
+float64 r
+float64 roll
+float64 pitch
+float64 yaw
+float64 z
+float64 zdot
+float64 s
+float64 sb
+float64 hb
+float64 hs
