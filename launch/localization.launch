@@ -14,9 +14,9 @@
     </node>
 
     <!-- <node pkg="rosbag" type="play" name="player" output="screen" args="$(find tensorflow_dvl)/bags/09/2022-09-27-15-58-45.bag"/> -->
-    <node pkg="rosbag" type="play" name="player" output="screen" args=" $(find tensorflow_dvl_bags)/bags/13/2022-09-15-11-08-51.bag"
+    <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/13/2022-09-15-11-08-51.bag"
         if="$(eval arg('bag_date') == '09-15')"/>
-    <node pkg="rosbag" type="play" name="player" output="screen" args=" $(find tensorflow_dvl_bags)/bags/17/2022-09-27-17-47-21.bag"
+    <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/17/2022-09-27-17-47-21.bag"
          if="$(eval arg('bag_date') == '09-27')"/>
     <!-- loc use tf node -->
     <node ns="$(arg robot_name)" name="alpha_localization_local_tf" pkg="robot_localization" type="ekf_localization_node" output="screen">

@@ -32,7 +32,7 @@ np.set_printoptions(precision=3, suppress=True)
 x_test = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        'roll':[], 'pitch':[],
+                        'q1':[], 'q2':[], 'q3':[], 'q4':[],
                         'volt':[],'amp':[],
                         'sb':[], 'hb':[],
                         'hs':[], 's':[],
@@ -50,37 +50,24 @@ enable_depth = rospy.get_param('/tensorflow_dvl/enable_depth')
 dvl_msg = TwistWithCovarianceStamped()
 test_msg = TFInputs()
 
-def callback_imu_accel(msg):
+def callback_imu(msg):
     global x_test
-    x_test.at[0, 'udot'] = msg.vector.x/10.0
-    x_test.at[0, 'vdot'] = msg.vector.y/10.0
-    x_test.at[0, 'wdot'] = (msg.vector.z+9.8)/10.0
+    x_test.at[0, 'udot'] = msg.linear_acceleration.x/10.0
+    x_test.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
+    x_test.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
+    x_test.at[0, 'p'] = msg.angular_velocity.x
+    x_test.at[0, 'q'] = msg.angular_velocity.y
+    x_test.at[0, 'r'] = msg.angular_velocity.z
+    x_test.at[0, 'q1'] = msg.orientation.x
+    x_test.at[0, 'q2'] = msg.orientation.y
+    x_test.at[0, 'q3'] = msg.orientation.z
+    x_test.at[0, 'q4'] = msg.orientation.w
     # test_msg.udot = msg.vector.x
     # test_msg.vdot = msg.vector.y
     # test_msg.wdot = msg.vector.z
 
     # test_msg.header.stamp = msg.header.stamp
     dvl_msg.header.stamp = msg.header.stamp
-
-
-def callback_imu_pqr(msg):
-    global x_test
-    x_test.at[0, 'p'] = msg.vector.x
-    x_test.at[0, 'q'] = msg.vector.y
-    x_test.at[0, 'r'] = msg.vector.z
-    # test_msg.p = msg.vector.x
-    # test_msg.q = msg.vector.y
-    # test_msg.r = msg.vector.z
-    # dvl_msg.header.stamp = msg.header.stamp
-    
-def callback_euler(msg):
-    global x_test
-    x_test.at[0, 'roll'] = msg.vector.x/4.0
-    x_test.at[0, 'pitch'] = msg.vector.y/4.0
-    # test_msg.roll = msg.vector.x
-    # test_msg.pitch = msg.vector.y
-    # x_test.at[0, 'yaw'] = msg.vector.z
-
 
 def callback_depth(msg):
     global z0
@@ -92,7 +79,10 @@ def callback_depth(msg):
     dt = zt_now-zt_0
     zt_0 = zt_now
     z0 = msg.data
-    x_test.at[0, 'z'] = msg.data/5.0
+    if msg.data>0.5:
+        x_test.at[0, 'z'] = 1
+    if msg.data<=0.5:
+        x_test.at[0, 'z'] = 0
     x_test.at[0, 'z_dot'] = dz/dt
     # test_msg.zdot = dz/dt
     # msg2.data = dz/dt
@@ -178,9 +168,9 @@ if __name__ == '__main__':
     pub = rospy.Publisher("/tensorflow_dvl/twist", TwistWithCovarianceStamped, queue_size=10)
     # zdot_pub = rospy.Publisher("/tensorflow_dvl/zdot",Float64Stamped, queue_size=10)
     # test_pub = rospy.Publisher("/xtest", TFInputs, queue_size=10)
-    accel_sub = rospy.Subscriber("/imu/acceleration", Vector3Stamped, callback_imu_accel)
-    pqr_sub = rospy.Subscriber("/imu/angular_velocity", Vector3Stamped, callback_imu_pqr)
-    euler_sub = rospy.Subscriber("/imu/euler/radians",Vector3Stamped,callback_euler)
+    accel_sub = rospy.Subscriber("/imu/data", Imu, callback_imu)
+    # pqr_sub = rospy.Subscriber("/imu/angular_velocity", Vector3Stamped, callback_imu_pqr)
+    # euler_sub = rospy.Subscriber("/imu/euler/radians",Vector3Stamped,callback_euler)
     pressure_sub = rospy.Subscriber("/depth", Float64Stamped, callback_depth)
     s_thrust_sub = rospy.Subscriber("/control/thruster/surge", Float64, callback_s_thrust)
     sb_thrust_sub = rospy.Subscriber("/control/thruster/sway_bow", Float64, callback_sb_thrust)
