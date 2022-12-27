@@ -4,19 +4,19 @@
     <arg name="model_num"  default="1"/>
     <arg name="is_sim" default="false"/>
     <!-- <arg name="model_date" default="09-27"/> -->
-    <arg name="bag_date" default ="09-27"/>
+    <arg name="bag_date" default ="09-15"/>
     <node pkg ="tensorflow_dvl" name = "tensorflow_dvl" type = "tf_dvl_node.py" output="screen" >
         <param name="/u_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/u/model$(arg model_num)/"/>
         <param name="/v_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/v/model$(arg model_num)/"/>
         <param name="/w_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/w/model$(arg model_num)/"/>
         <param name="/hz" type="double" value="50"/>
-        <param name="/enable_depth" type="double" value="0.5"/>
+        <param name="/enable_depth" type="double" value="0.6"/>
     </node>
 
     <!-- <node pkg="rosbag" type="play" name="player" output="screen" args="$(find tensorflow_dvl)/bags/09/2022-09-27-15-58-45.bag"/> -->
     <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/13/2022-09-15-11-08-51.bag"
         if="$(eval arg('bag_date') == '09-15')"/>
-    <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/17/2022-09-27-17-47-21.bag"
+    <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/16/2022-09-27-17-41-09.bag"
          if="$(eval arg('bag_date') == '09-27')"/>
     <!-- loc use tf node -->
     <node ns="$(arg robot_name)" name="alpha_localization_local_tf" pkg="robot_localization" type="ekf_localization_node" output="screen">
