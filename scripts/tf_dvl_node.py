@@ -47,7 +47,7 @@ v_inputs = pd.DataFrame({
                         'u':[], 'w':[],
                         's':[], 'sb':[],
                         'hs':[], 'hb':[],
-                        'z':[]
+                        'z_dot':[], 'z':[]
                         })
 
 w_inputs = pd.DataFrame({
@@ -144,7 +144,7 @@ def callback_depth(msg):
         v_inputs.at[0, 'z'] = 0
         w_inputs.at[0, 'z'] = 0
     u_inputs.at[0, 'z_dot'] = dz/dt
-    # v_inputs.at[0, 'z_dot'] = dz/dt
+    v_inputs.at[0, 'z_dot'] = dz/dt
     w_inputs.at[0, 'z_dot'] = dz/dt
 
 def callback_s_thrust(msg):
