@@ -31,31 +31,28 @@ np.set_printoptions(precision=3, suppress=True)
 ## it has to be in this format for some reason
 u_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
-                        'q':[], 'r':[],
-                        'pitch':[], 
+                        'p':[], 'q':[], 'r':[],
+                        'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
-                        's':[], 'sb':[],
-                        'hs':[], 'hb':[],
+                        's':[],
                         'z_dot':[], 'z':[]
                         })
 
 v_inputs = pd.DataFrame({
+                        'u':[], 'w':[],
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        'roll':[],'pitch':[], 
+                        'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
-                        'u':[], 'w':[],
-                        's':[], 'sb':[],
-                        'hs':[], 'hb':[],
+                        'sb':[],
                         'z_dot':[], 'z':[]
                         })
-
+                        
 w_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        'roll':[],'pitch':[], 
+                        'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
-                        's':[], 'sb':[],
                         'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
@@ -98,7 +95,7 @@ def callback_imu(msg):
     w_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
     w_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
 
-    # u_inputs.at[0, 'p'] = msg.angular_velocity.x
+    u_inputs.at[0, 'p'] = msg.angular_velocity.x
     u_inputs.at[0, 'q'] = msg.angular_velocity.y
     u_inputs.at[0, 'r'] = msg.angular_velocity.z
 
@@ -110,18 +107,33 @@ def callback_imu(msg):
     w_inputs.at[0, 'q'] = msg.angular_velocity.y
     w_inputs.at[0, 'r'] = msg.angular_velocity.z
 
+    u_inputs.at[0, 'q1'] = msg.orientation.x
+    u_inputs.at[0, 'q2'] = msg.orientation.y
+    u_inputs.at[0, 'q3'] = msg.orientation.z
+    u_inputs.at[0, 'q4'] = msg.orientation.w
+
+    v_inputs.at[0, 'q1'] = msg.orientation.x
+    v_inputs.at[0, 'q2'] = msg.orientation.y
+    v_inputs.at[0, 'q3'] = msg.orientation.z
+    v_inputs.at[0, 'q4'] = msg.orientation.w
+
+    w_inputs.at[0, 'q1'] = msg.orientation.x
+    w_inputs.at[0, 'q2'] = msg.orientation.y
+    w_inputs.at[0, 'q3'] = msg.orientation.z
+    w_inputs.at[0, 'q4'] = msg.orientation.w
+
     dvl_msg.header.stamp = msg.header.stamp
 def callback_euler(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # u_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
 
-    v_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
-    v_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # v_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
+    # v_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
 
-    w_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
-    w_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # w_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
+    # w_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
     
 def callback_depth(msg):
     global z0
@@ -152,25 +164,25 @@ def callback_s_thrust(msg):
     global v_inputs
     global w_inputs
     u_inputs.at[0, 's'] = msg.data
-    v_inputs.at[0, 's'] = msg.data
-    w_inputs.at[0, 's'] = msg.data
+    # v_inputs.at[0, 's'] = msg.data
+    # w_inputs.at[0, 's'] = msg.data
     # test_msg.s = msg.data
 
 def callback_sb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'sb'] = msg.data
+    # u_inputs.at[0, 'sb'] = msg.data
     v_inputs.at[0, 'sb'] = msg.data
-    w_inputs.at[0, 'sb'] = msg.data
+    # w_inputs.at[0, 'sb'] = msg.data
     # test_msg.sb = msg.data
 
 def callback_hb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'hb'] = msg.data
-    v_inputs.at[0, 'hb'] = msg.data
+    # u_inputs.at[0, 'hb'] = msg.data
+    # v_inputs.at[0, 'hb'] = msg.data
     w_inputs.at[0, 'hb'] = msg.data
     # test_msg.hb = msg.data
 
@@ -178,8 +190,8 @@ def callback_hs_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'hs'] = msg.data
-    v_inputs.at[0, 'hs'] = msg.data
+    # u_inputs.at[0, 'hs'] = msg.data
+    # v_inputs.at[0, 'hs'] = msg.data
     w_inputs.at[0, 'hs'] = msg.data
     # test_msg.hs = msg.data
 
@@ -207,15 +219,7 @@ def compute_vel():
     global test_msg
     if not u_inputs.empty:
         # print(x_test.isnull().values.any())
-            #update the velocity if vehicle is below the surface
-        # print(x_test.iloc[[0],0:3])
-        # print(x_test.iloc[[0],3:6])
-        # print(x_test.iloc[[0],6:9])
-        # print(x_test.iloc[[0],9:12])
-        # print(x_test.iloc[[0],12:15])
-        # print(x_test.iloc[[0],15:16])
-        # print(x_test.rank())
-        # print(list(x_test))
+       
         if z0 > enable_depth:
             # print(x_test)
             # u_pre = u_model.predict(x_test, verbose='none',use_multiprocessing=True)
@@ -225,8 +229,8 @@ def compute_vel():
             w_pre = w_model(w_inputs.astype("float32").to_numpy(), training=False)
             v_inputs.at[0, 'u'] =u_pre[0, 0].numpy()
             v_inputs.at[0, 'w'] =w_pre[0, 0].numpy()
-            v_pre = v_model(v_inputs.astype("float32").to_numpy(), training=False)
 
+            v_pre = v_model(v_inputs.astype("float32").to_numpy(), training=False)
             dvl_msg.twist.twist.linear.x = u_pre
             dvl_msg.twist.twist.linear.y = v_pre
             dvl_msg.twist.twist.linear.z = w_pre

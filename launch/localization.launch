@@ -6,10 +6,10 @@
     <!-- <arg name="model_date" default="09-27"/> -->
     <arg name="bag_date" default ="09-15"/>
     <node pkg ="tensorflow_dvl" name = "tensorflow_dvl" type = "tf_dvl_node.py" output="screen" >
-        <param name="/u_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/u/"/>
-        <param name="/v_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/v/model$(arg model_num)/"/>
-        <param name="/w_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/w/"/>
-        <param name="/hz" type="double" value="100"/>
+        <param name="/u_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/u"/>
+        <param name="/v_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/v"/>
+        <param name="/w_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/w"/>
+        <param name="/hz" type="double" value="20"/>
         <param name="/enable_depth" type="double" value="0.6"/>
     </node>
 
