@@ -32,6 +32,7 @@ np.set_printoptions(precision=3, suppress=True)
 u_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
+                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
                         's':[],
@@ -42,6 +43,7 @@ v_inputs = pd.DataFrame({
                         'u':[], 'w':[],
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
+                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
                         'sb':[],
@@ -51,6 +53,7 @@ v_inputs = pd.DataFrame({
 w_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
+                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[],
                         'hs':[], 'hb':[],
@@ -127,6 +130,7 @@ def callback_euler(msg):
     global u_inputs
     global v_inputs
     global w_inputs
+    # u_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
     # u_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
 
     # v_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
