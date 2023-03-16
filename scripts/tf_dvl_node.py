@@ -32,10 +32,9 @@ np.set_printoptions(precision=3, suppress=True)
 u_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[],
-                        's':[],
+                        'volt':[], 
+                        's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
 
@@ -43,9 +42,8 @@ v_inputs = pd.DataFrame({
                         'u':[], 'w':[],
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[],
+                        'volt':[], 
                         'sb':[],
                         'z_dot':[], 'z':[]
                         })
@@ -53,23 +51,12 @@ v_inputs = pd.DataFrame({
 w_inputs = pd.DataFrame({
                         'udot':[], 'vdot':[], 'wdot':[],
                         'p':[], 'q':[], 'r':[],
-                        # 'roll':[], 'pitch':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[],
+                        'volt':[], 
                         'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
 
-
-# x_test = pd.DataFrame({
-#                         'udot':[], 'vdot':[], 'wdot':[],
-#                         'p':[], 'q':[], 'r':[],
-#                         'q1':[], 'q2':[], 'q3':[], 'q4':[],
-#                         'volt':[],
-#                         'sb':[], 'hb':[],
-#                         'hs':[], 's':[],
-#                         'z_dot':[], 'z':[]
-#                         })
 z0 = 0
 zt_0 = time.time()
 
@@ -130,14 +117,14 @@ def callback_euler(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
-    # u_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # u_inputs.at[0, 'roll'] = msg.vector.x/4.0
+    # u_inputs.at[0, 'pitch'] = msg.vector.y/4.0
 
-    # v_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
-    # v_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # v_inputs.at[0, 'roll'] = msg.vector.x/4.0
+    # v_inputs.at[0, 'pitch'] = msg.vector.y/4.0
 
-    # w_inputs.at[0, 'roll'] = np.cos(msg.vector.x)
-    # w_inputs.at[0, 'pitch'] = np.cos(msg.vector.y)
+    # w_inputs.at[0, 'roll'] = msg.vector.x/4.0
+    # w_inputs.at[0, 'pitch'] = msg.vector.y/4.0
     
 def callback_depth(msg):
     global z0
@@ -176,7 +163,7 @@ def callback_sb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'sb'] = msg.data
+    u_inputs.at[0, 'sb'] = msg.data
     v_inputs.at[0, 'sb'] = msg.data
     # w_inputs.at[0, 'sb'] = msg.data
     # test_msg.sb = msg.data
@@ -185,7 +172,7 @@ def callback_hb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'hb'] = msg.data
+    u_inputs.at[0, 'hb'] = msg.data
     # v_inputs.at[0, 'hb'] = msg.data
     w_inputs.at[0, 'hb'] = msg.data
     # test_msg.hb = msg.data
@@ -194,7 +181,7 @@ def callback_hs_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'hs'] = msg.data
+    u_inputs.at[0, 'hs'] = msg.data
     # v_inputs.at[0, 'hs'] = msg.data
     w_inputs.at[0, 'hs'] = msg.data
     # test_msg.hs = msg.data
@@ -211,7 +198,9 @@ def callback_amp(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # x_test.at[0, 'amp'] = msg.data/20000.00
+    # u_inputs.at[0, 'amp'] = msg.data/20000.00
+    # v_inputs.at[0, 'amp'] = msg.data/20000.00
+    # w_inputs.at[0, 'amp'] = msg.data/20000.00
     
 def compute_vel():
     global u_inputs
