@@ -34,7 +34,8 @@ u_inputs = pd.DataFrame({
                         'p':[], 'q':[], 'r':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[], 
-                        's':[], 'sb':[], 'hs':[], 'hb':[],
+                        's':[],
+                        # 's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
 
@@ -44,7 +45,8 @@ v_inputs = pd.DataFrame({
                         'p':[], 'q':[], 'r':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
                         'volt':[], 
-                        'sb':[],
+                        # 'sb':[],
+                        's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
                         
@@ -155,7 +157,7 @@ def callback_s_thrust(msg):
     global v_inputs
     global w_inputs
     u_inputs.at[0, 's'] = msg.data
-    # v_inputs.at[0, 's'] = msg.data
+    v_inputs.at[0, 's'] = msg.data
     # w_inputs.at[0, 's'] = msg.data
     # test_msg.s = msg.data
 
@@ -163,7 +165,7 @@ def callback_sb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'sb'] = msg.data
+    # u_inputs.at[0, 'sb'] = msg.data
     v_inputs.at[0, 'sb'] = msg.data
     # w_inputs.at[0, 'sb'] = msg.data
     # test_msg.sb = msg.data
@@ -172,8 +174,8 @@ def callback_hb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'hb'] = msg.data
-    # v_inputs.at[0, 'hb'] = msg.data
+    # u_inputs.at[0, 'hb'] = msg.data
+    v_inputs.at[0, 'hb'] = msg.data
     w_inputs.at[0, 'hb'] = msg.data
     # test_msg.hb = msg.data
 
@@ -181,8 +183,8 @@ def callback_hs_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    u_inputs.at[0, 'hs'] = msg.data
-    # v_inputs.at[0, 'hs'] = msg.data
+    # u_inputs.at[0, 'hs'] = msg.data
+    v_inputs.at[0, 'hs'] = msg.data
     w_inputs.at[0, 'hs'] = msg.data
     # test_msg.hs = msg.data
 
