@@ -4,12 +4,12 @@
     <arg name="model_num"  default="1"/>
     <arg name="is_sim" default="false"/>
     <!-- <arg name="model_date" default="09-27"/> -->
-    <arg name="bag_date" default ="09-27-17"/>
+    <arg name="bag_date" default ="09-27-14"/>
     <node pkg ="tensorflow_dvl" name = "tensorflow_dvl" type = "tf_dvl_node.py" output="screen" >
         <param name="/u_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/u"/>
         <param name="/v_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/v"/>
         <param name="/w_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/w"/>
-        <param name="/hz" type="double" value="5"/>
+        <param name="/hz" type="double" value="50"/>
         <param name="/enable_depth" type="double" value="0.6"/>
     </node>
     <node pkg="rosbag" type="play" name="player" output="log" args=" $(find tensorflow_dvl_bags)/bags/15-12/2022-09-15-10-58-31.bag"

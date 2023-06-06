@@ -30,32 +30,29 @@ np.set_printoptions(precision=3, suppress=True)
 #                         })
 ## it has to be in this format for some reason
 u_inputs = pd.DataFrame({
-                        'udot':[], 'vdot':[], 'wdot':[],
+                        'udot':[], 
                         'p':[], 'q':[], 'r':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[], 
-                        's':[],
-                        # 's':[], 'sb':[], 'hs':[], 'hb':[],
+                        'volt':[], 'amp':[],
+                        's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
 
 v_inputs = pd.DataFrame({
-                        'u':[], 'w':[],
-                        'udot':[], 'vdot':[], 'wdot':[],
+                        'vdot':[], 
                         'p':[], 'q':[], 'r':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[], 
-                        # 'sb':[],
+                        'volt':[], 'amp':[],
                         's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
                         
 w_inputs = pd.DataFrame({
-                        'udot':[], 'vdot':[], 'wdot':[],
+                        'wdot':[],
                         'p':[], 'q':[], 'r':[],
                         'q1':[], 'q2':[], 'q3':[], 'q4':[], 
-                        'volt':[], 
-                        'hs':[], 'hb':[],
+                        'volt':[], 'amp':[],
+                        's':[], 'sb':[], 'hs':[], 'hb':[],
                         'z_dot':[], 'z':[]
                         })
 
@@ -76,15 +73,15 @@ def callback_imu(msg):
     global v_inputs
     global w_inputs
     u_inputs.at[0, 'udot'] = msg.linear_acceleration.x/10.0
-    u_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
-    u_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
+    # u_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
+    # u_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
 
-    v_inputs.at[0, 'udot'] = msg.linear_acceleration.x/10.0
+    # v_inputs.at[0, 'udot'] = msg.linear_acceleration.x/10.0
     v_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
-    v_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
+    # v_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
 
-    w_inputs.at[0, 'udot'] = msg.linear_acceleration.x/10.0
-    w_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
+    # w_inputs.at[0, 'udot'] = msg.linear_acceleration.x/10.0
+    # w_inputs.at[0, 'vdot'] = msg.linear_acceleration.y/10.0
     w_inputs.at[0, 'wdot'] = (msg.linear_acceleration.z+9.8)/10.0
 
     u_inputs.at[0, 'p'] = msg.angular_velocity.x
@@ -158,23 +155,23 @@ def callback_s_thrust(msg):
     global w_inputs
     u_inputs.at[0, 's'] = msg.data
     v_inputs.at[0, 's'] = msg.data
-    # w_inputs.at[0, 's'] = msg.data
+    w_inputs.at[0, 's'] = msg.data
     # test_msg.s = msg.data
 
 def callback_sb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'sb'] = msg.data
+    u_inputs.at[0, 'sb'] = msg.data
     v_inputs.at[0, 'sb'] = msg.data
-    # w_inputs.at[0, 'sb'] = msg.data
+    w_inputs.at[0, 'sb'] = msg.data
     # test_msg.sb = msg.data
 
 def callback_hb_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'hb'] = msg.data
+    u_inputs.at[0, 'hb'] = msg.data
     v_inputs.at[0, 'hb'] = msg.data
     w_inputs.at[0, 'hb'] = msg.data
     # test_msg.hb = msg.data
@@ -183,7 +180,7 @@ def callback_hs_thrust(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'hs'] = msg.data
+    u_inputs.at[0, 'hs'] = msg.data
     v_inputs.at[0, 'hs'] = msg.data
     w_inputs.at[0, 'hs'] = msg.data
     # test_msg.hs = msg.data
@@ -200,9 +197,9 @@ def callback_amp(msg):
     global u_inputs
     global v_inputs
     global w_inputs
-    # u_inputs.at[0, 'amp'] = msg.data/20000.00
-    # v_inputs.at[0, 'amp'] = msg.data/20000.00
-    # w_inputs.at[0, 'amp'] = msg.data/20000.00
+    u_inputs.at[0, 'amp'] = msg.data/20000.00
+    v_inputs.at[0, 'amp'] = msg.data/20000.00
+    w_inputs.at[0, 'amp'] = msg.data/20000.00
     
 def compute_vel():
     global u_inputs
@@ -222,15 +219,16 @@ def compute_vel():
             # w_pre = v_model.predict(x_test, verbose='none',use_multiprocessing=True)
             u_pre = u_model(u_inputs.astype("float32").to_numpy(), training=False)
             w_pre = w_model(w_inputs.astype("float32").to_numpy(), training=False)
-            v_inputs.at[0, 'u'] =u_pre[0, 0].numpy()
-            v_inputs.at[0, 'w'] =w_pre[0, 0].numpy()
+            # v_inputs.at[0, 'u'] =u_pre[0, 0].numpy()
+            # v_inputs.at[0, 'w'] =w_pre[0, 0].numpy()
 
             v_pre = v_model(v_inputs.astype("float32").to_numpy(), training=False)
             dvl_msg.twist.twist.linear.x = u_pre
             dvl_msg.twist.twist.linear.y = v_pre
             dvl_msg.twist.twist.linear.z = w_pre
-        dvl_msg.header.frame_id = "alpha/dvl"
-        pub.publish(dvl_msg)
+            # dvl_msg.twist.covariance[7]= 0.1
+        # dvl_msg.header.frame_id = "alpha/dvl"
+        # pub.publish(dvl_msg)
         # test_pub.publish(test_msg)
 
 def callback_dvl(msg):
@@ -243,7 +241,11 @@ def callback_dvl(msg):
             dvl_msg.twist.twist.linear.x = msg.twist.twist.linear.x
             dvl_msg.twist.twist.linear.y = msg.twist.twist.linear.y
             dvl_msg.twist.twist.linear.z = msg.twist.twist.linear.z
-
+            # dvl_msg.twist.twist.linear.x = u_pre
+            # dvl_msg.twist.twist.linear.y = v_pre
+            # dvl_msg.twist.twist.linear.z = w_pre
+        dvl_msg.header.frame_id = "alpha/dvl"
+        pub.publish(dvl_msg)
 
 if __name__ == '__main__':
     rospy.init_node('tf_dvl_node') 
