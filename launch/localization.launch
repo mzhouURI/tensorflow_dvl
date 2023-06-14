@@ -4,7 +4,7 @@
     <arg name="model_num"  default="1"/>
     <arg name="is_sim" default="false"/>
     <!-- <arg name="model_date" default="09-27"/> -->
-    <arg name="bag_date" default ="09-27-14"/>
+    <arg name="bag_date" default ="09-27-09"/>
     <node pkg ="tensorflow_dvl" name = "tensorflow_dvl" type = "tf_dvl_node.py" output="screen" >
         <param name="/u_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/u"/>
         <param name="/v_model_dir" type="string" value="$(find tensorflow_dvl)/config/models/v"/>
